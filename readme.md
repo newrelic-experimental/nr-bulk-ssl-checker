@@ -8,12 +8,12 @@ The targets to test are provided by calling the function getTargets(). You can p
 ```json
 [
     {
-        "name","BBC News",
-        "url","news.bbc.co.uk"
+        "name":"BBC News",
+        "url":"news.bbc.co.uk"
     },
     {
-        "name","Site Name Here",
-        "url","Domain name here"
+        "name":"Site Name Here",
+        "url":"Domain name here"
     },
     {...}
 ]
