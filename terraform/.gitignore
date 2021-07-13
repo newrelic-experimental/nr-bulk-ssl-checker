@@ -1,0 +1,4 @@
+terraform.tfstate*
+.terraform*
+runtf.sh
+.DS_Store

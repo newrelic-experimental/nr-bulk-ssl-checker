@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# A dinky helper to run terraform supplying secrets as vars
+#
+# Call like: `./runtf.sh plan`
+#        or: `./runtf.sh apply`
+#        etc
+#
+
+terraformNRAccountId="0"        # Your New Relic account ID
+terraformAPIKey="NRAK-xxx"      # A New Relic User API Key 
+insertAPIKey="NRII-xxx"         # A New Relic "insights" insert key - API key for sending data to the Metrics API
+
+bash -c "terraform $1 -var terraformAPIKey=\"${terraformAPIKey}\" -var terraformNRAccountId=\"${terraformNRAccountId}\"  -var insertAPIKey=\"${insertAPIKey}\""
