@@ -22,3 +22,9 @@ The targets to test are provided by calling the function getTargets(). You can p
 ## Getting started
 
 Checkout the repo, copy `runtf.sh.sample` to `runtf.sh` and add your API keys. Then run `terraform init` to initialise and `./runtf.sh apply` to deploy to New Relic.
+
+## Dashboard
+
+The application comes with a built in dashbaord. Set up alerts as you require.
+
+![dashboard-example](dashboard.png)
