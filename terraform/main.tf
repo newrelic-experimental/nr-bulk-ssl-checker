@@ -8,18 +8,23 @@ module "SSLChecker" {
     frequency = 60
     jobs = {
         # Small example
+
         one = {
             name = "Static targets (small)",
             data = file("${path.module}/targetdata/static_small.js")
         },
 
-        # # Longer example to show batching in operation
+
+        # Longer example to show batching in operation
+
         # two = {
         #     name = "Static targets (large)",
         #     data = file("${path.module}/targetdata/static_large.js")
         # },
 
-        # # API driven example
+
+        # API driven example
+
         # api = {
         #     name = "API Example",
         #     data = file("${path.module}/targetdata/api-driven.js")
