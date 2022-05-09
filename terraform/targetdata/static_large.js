@@ -191,7 +191,7 @@ const getTargets=async ()=>{
       let longListData=longList.map((i)=>{
           return {
               name: i,
-              url: i
+              domain: i
           }
       })
     return longListData

@@ -4,7 +4,7 @@ variable terraformAPIKey {}
 # Configure the terraform and New Relic provider versions
 # More details: https://www.terraform.io/docs/configuration/provider-requirements.html
 terraform {
-  required_version = "~> 1.0.1"
+  required_version = "> 1.0.1"
   required_providers {
     newrelic = {
       source  = "newrelic/newrelic"
@@ -18,9 +18,9 @@ terraform {
 # More details: https://registry.terraform.io/providers/newrelic/newrelic/latest/docs/guides/getting_started
 
 provider "newrelic" {
-  account_id = var.terraformNRAccountId            # Your New Relic account ID
-  api_key = var.terraformAPIKey   # Usually prefixed with 'NRAK'
-  region = "US"                    # Valid regions are US and EU
+  account_id = var.terraformNRAccountId       # Your New Relic account ID
+  api_key = var.terraformAPIKey               # Usually prefixed with 'NRAK'
+  region = "US"                               # Valid regions are US and EU
 }
 
 
