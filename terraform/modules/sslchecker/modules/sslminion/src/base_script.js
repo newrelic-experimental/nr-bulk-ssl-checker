@@ -3,7 +3,7 @@
 */
 
 
-const  getSSLExpiration = function(options,success,fail) {
+const getSSLExpiration = function(options,success,fail) {
     !('timeout' in options) && (options.timeout = DEFAULT_TIMEOUT) //add a timeout if not already specified 
     options.followRedirect = false //only the first request contains ssl data
     return new Promise((resolve, reject) => {
@@ -30,8 +30,27 @@ const  getSSLExpiration = function(options,success,fail) {
 
 async function run() {
 
-    let targets = await getTargets()
+    const sourceData = await getTargets();
 
+    const targets = flat(sourceData.map((x) => {
+        const name = x.name || x.domain;
+
+        if (x.hosts && x.hosts.length) {
+            return x.hosts.map((y) => ({
+                name: `${y} | ${name}`,
+                domain: x.domain,
+                host: y,
+                url: `https://${y}`,
+            }))
+        } else {
+            return {
+                name: name,
+                domain: x.domain,
+                host: x.domain,
+                url: `https://${x.domain}`,
+            }
+        }
+    }));
     
     let expectedTargets=targets.length
     setAttribute("expectedTargets",expectedTargets)
@@ -43,8 +62,11 @@ async function run() {
 
         batch.forEach((target)=>{
             let options = {
-                url: `https://${target.url}`,
-                method: 'HEAD'
+                url: target.url,
+                method: 'HEAD',
+                headers: {
+                    host: target.domain
+                }
             }
             promises.push(getSSLExpiration(options,
                 (certData)=>{
@@ -97,6 +119,8 @@ async function run() {
             }
             metricPayload.attributes[`${NAMESPACE}.name`]=target.name
             metricPayload.attributes[`${NAMESPACE}.url`]=target.url
+            metricPayload.attributes[`${NAMESPACE}.host`]=target.host
+            metricPayload.attributes[`${NAMESPACE}.domain`]=target.domain
             metricPayload.attributes[`${NAMESPACE}.valid_to`]=target.valid_to
             metricPayload.attributes[`${NAMESPACE}.issuer`]=target.issuer
             metricPayload.attributes[`${NAMESPACE}.expirationDate`]=target.expirationDate

@@ -123,7 +123,8 @@ async function asyncForEach(array, callback) {
     }
   }
 
-/* Chunk array 
+/* 
+* Chunk array 
 */
 function chunk_arr(inputArray,perChunk) {
     var perChunk = 2 // items per chunk    
@@ -133,6 +134,15 @@ function chunk_arr(inputArray,perChunk) {
         return all
      }, [])
 }
+
+/* 
+* Flattens an array
+*/
+function flat(arr, depth = 1) {
+  return arr.reduce(function (flat, toFlatten) {
+    return flat.concat((Array.isArray(toFlatten) && (depth>1)) ? flat(toFlatten, depth-1) : toFlatten);
+  }, []);
+};
 
 
 /* 
