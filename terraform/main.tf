@@ -5,7 +5,7 @@ module "SSLChecker" {
     source = "./modules/sslchecker"
     insertAPIKey = var.insertAPIKey
     locations = ["AWS_US_EAST_1"] //set the AWS region(s) you want it to run 
-    frequency = "EVERY_5_MINUTES"
+    frequency = 60
     jobs = {
         # Small example
 

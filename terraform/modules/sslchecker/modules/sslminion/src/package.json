@@ -4,25 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "uglifyjs --compress --mangle -- ./base_script.js  > synthetic.js && awk 1 ./utils_script.js >> synthetic.js",
-    "add": "git add ./synthetic.js",
-    "echo": "echo Build: synthetic.js created!"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "pre-commit": [
-    "build",
-    "add",
-    "echo"
-  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "assert": "^2.0.0",
     "moment": "^2.24.0",
-    "request": "^2.88.0",
-    "uglifyjs": "^2.4.11"
-  },
-  "devDependencies": {
-    "pre-commit": "^1.2.2",
-    "uglify-js": "^3.17.4"
+    "request": "^2.88.0"
   }
 }

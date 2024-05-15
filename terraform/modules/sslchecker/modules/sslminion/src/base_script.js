@@ -105,6 +105,7 @@ async function run() {
         //Construct metric payload
         let commonMetricBlock={"attributes": {}}
         commonMetricBlock.attributes[`${NAMESPACE}.monitorName`]=MONITOR_NAME
+        commonMetricBlock.attributes[`${NAMESPACE}.monitorId`]=MONITOR_ID
         commonMetricBlock.attributes[`tool`]=NAMESPACE 
 
         let unixTimeNow=Math.round(Date.now()/1000)
