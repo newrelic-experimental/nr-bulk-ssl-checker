@@ -2,28 +2,35 @@
 * ----------------------------------------------------------------------------------
 */
 
+const tls = require('tls');
 
 const getSSLExpiration = function(options,success,fail) {
     !('timeout' in options) && (options.timeout = DEFAULT_TIMEOUT) //add a timeout if not already specified 
     options.followRedirect = false //only the first request contains ssl data
     return new Promise((resolve, reject) => {
-        $http(options, function callback(error, response, body) {
-        if(error) {
-            reject(fail(`Connection error on url '${options.url}'`))
-        } else {
-            let certDetails = (response.socket.getPeerCertificate());   
+        const sd = tls.connect(options.port,options.host, {
+            servername: options.host,
+        }, () => {
+            const certDetails = sd.getPeerCertificate(true);
+            // console.log(`${options.url} data:`,certDetails)
+            sd.end();
             if(certDetails && certDetails.valid_to) {
                 let certData={ 
                     valid_to: certDetails.valid_to,
                     issuer: (certDetails.issuer && certDetails.issuer.O) ? certDetails.issuer.O : "Unkown"
 
                 }      
-                //console.log(`${options.url} data:`,certData)
                 resolve(success(certData))
             } else {
                 reject(fail(`Expiration date missing`))
             }
-          }
+
+        });
+
+        sd.on('error', function (err) {
+            err.name = 'CHECK_CERT_EXPIRATION_COMM';
+            reject(err);
+
         });
     })
 }
@@ -63,6 +70,8 @@ async function run() {
         batch.forEach((target)=>{
             let options = {
                 url: target.url,
+                host: target.host,
+                port: 443,
                 method: 'HEAD',
                 headers: {
                     host: target.domain

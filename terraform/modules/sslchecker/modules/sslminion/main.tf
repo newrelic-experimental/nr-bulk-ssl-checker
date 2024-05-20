@@ -9,7 +9,7 @@ variable "nameSpace" { description = "Namespace for the app, usually SSLCHKR, pr
 
 resource "newrelic_synthetics_script_monitor" "monitor" {
   status               = "ENABLED"
-  name                 = "${var.nameSpace}-${var.name}"
+  name                 = "${var.nameSpace}_${var.name}"
   type                 = "SCRIPT_API"
   locations_public     = var.locations
   period               = var.frequency
@@ -22,15 +22,15 @@ resource "newrelic_synthetics_script_monitor" "monitor" {
 }
 
 resource "newrelic_synthetics_secure_credential" "metricsInsertKey" {
-  key = "${random_string.random.result}"
+  key = "${var.nameSpace}_${random_string.random.result}"
   value = var.insertKeyValue
   description = "API key for inserting metrics data to New Relic"
 }
 
 resource "random_string" "random" {
   length           = 6
-  special          = true
-  override_special = "/@£$"
+  special          = false
+  override_special = "/@£$_-"
 }
 
 data "local_file" "synthetic_js" {
