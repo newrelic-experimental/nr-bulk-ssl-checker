@@ -47,12 +47,14 @@ async function run() {
     const targets = flat(sourceData.map((x) => {
         const name = x.name || x.domain;
 
+        //if config contains a hosts array then we run a test for each
         if (x.hosts && x.hosts.length) {
             return x.hosts.map((y) => ({
                 name: `${y} | ${name}`,
                 domain: x.domain,
                 host: y,
                 url: `https://${y}`,
+                timeout: x.timeout ? x.timeout : DEFAULT_TIMEOUT,
             }))
         } else {
             return {
@@ -60,6 +62,7 @@ async function run() {
                 domain: x.domain,
                 host: x.domain,
                 url: `https://${x.domain}`,
+                timeout: x.timeout ? x.timeout : DEFAULT_TIMEOUT,
             }
         }
     }));
@@ -77,7 +80,7 @@ async function run() {
                 host: target.host,
                 port: 443,
                 domain: target.domain,
-                timeout: target.timeout?target.timeout:DEFAULT_TIMEOUT,
+                timeout: target.timeout
             }
             promises.push(getSSLExpiration(connectionConfig,
                 (certData)=>{
