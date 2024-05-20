@@ -1,18 +1,10 @@
 /*
-* Utils and common settings
+* Utils 
 */
 
 const moment = require("moment")
 let assert = require('assert')
 
-const DEFAULT_TIMEOUT = 5000
-const BATCH_SIZE = 50
-const METRIC_API = "https://metric-api.newrelic.com/metric/v1" //US DC accounts
-
-const CRITICAL_THRESHOLD = 14
-const WARNING_THRESHOLD = 28
-
-let RUNNING_LOCALLY = false
 let scriptErrors = []
 let criticalErrors = []
 let warningErrors = []

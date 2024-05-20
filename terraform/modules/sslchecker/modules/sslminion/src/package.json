@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "uglifyjs --compress --mangle -- ./base_script.js  > synthetic.js && awk 1 ./utils_script.js >> synthetic.js",
-    "add": "git add ./synthetic.js",
+    "build": "cat ./header.js > synthetic.js && uglifyjs --compress --mangle -- ./base_script.js  >> synthetic.js && uglifyjs --compress --mangle -- ./utils_script.js >> synthetic.js && cat ./example_header.js > ../../../../../../copy-paste-example.js && cat ./synthetic.js >> ../../../../../../copy-paste-example.js",
+    "add": "git add ./synthetic.js && git add ../../../../../../copy-paste-example.js",
     "echo": "echo Build: synthetic.js created!"
   },
   "pre-commit": [
