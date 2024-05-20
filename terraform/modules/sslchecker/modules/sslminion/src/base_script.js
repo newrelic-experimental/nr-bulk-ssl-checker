@@ -4,31 +4,33 @@
 
 const tls = require('tls');
 
-const getSSLExpiration = function(options,success,fail) {
-    !('timeout' in options) && (options.timeout = DEFAULT_TIMEOUT) //add a timeout if not already specified 
-    options.followRedirect = false //only the first request contains ssl data
+// const mytlssocket = tls.TLSSocket
+// mytlssocket.setTimeout(3000)
+
+const getSSLExpiration = function(connectionConfig,success,fail) {
     return new Promise((resolve, reject) => {
-        const sd = tls.connect(options.port,options.host, {
-            servername: options.host,
+        const sd = tls.connect(connectionConfig.port,connectionConfig.host, {
+            servername: connectionConfig.domain,
         }, () => {
             const certDetails = sd.getPeerCertificate(true);
-            // console.log(`${options.url} data:`,certDetails)
+            
             sd.end();
             if(certDetails && certDetails.valid_to) {
                 let certData={ 
                     valid_to: certDetails.valid_to,
                     issuer: (certDetails.issuer && certDetails.issuer.O) ? certDetails.issuer.O : "Unkown"
-
                 }      
+                console.log(`${connectionConfig.host} ${connectionConfig.domain} data:`,certData)
                 resolve(success(certData))
             } else {
                 reject(fail(`Expiration date missing`))
             }
 
         });
-
+        sd.setTimeout(DEFAULT_TIMEOUT)
         sd.on('error', function (err) {
             err.name = 'CHECK_CERT_EXPIRATION_COMM';
+            console.log(`${connectionConfig.host} ${connectionConfig.domain}`)
             reject(err);
 
         });
@@ -68,16 +70,12 @@ async function run() {
         let promises=[]
 
         batch.forEach((target)=>{
-            let options = {
-                url: target.url,
+            let connectionConfig = {
                 host: target.host,
                 port: 443,
-                method: 'HEAD',
-                headers: {
-                    host: target.domain
-                }
+                domain: target.domain,
             }
-            promises.push(getSSLExpiration(options,
+            promises.push(getSSLExpiration(connectionConfig,
                 (certData)=>{
                     let expirationDate = new Date(certData.valid_to)
                     let expirationMoment=moment(expirationDate)
