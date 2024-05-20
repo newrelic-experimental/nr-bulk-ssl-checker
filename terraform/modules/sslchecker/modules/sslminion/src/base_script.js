@@ -29,10 +29,8 @@ const getSSLExpiration = function(connectionConfig,success,fail) {
         });
         sd.setTimeout(DEFAULT_TIMEOUT)
         sd.on('error', function (err) {
-            err.name = 'CHECK_CERT_EXPIRATION_COMM';
-            console.log(`${connectionConfig.host} ${connectionConfig.domain}`)
-            reject(err);
-
+            //console.log(err);
+            reject(fail(`Error with connect to ${connectionConfig.host}:${connectionConfig.domain}`));
         });
     })
 }
