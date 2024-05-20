@@ -3,6 +3,9 @@
 */
 const tls = require('tls');
 
+const starttime= Date.now()
+console.log(`Start time:`,starttime)
+
 const getSSLExpiration = function(connectionConfig,success,fail) {
     return new Promise((resolve, reject) => {
         const sd = tls.connect(connectionConfig.port,connectionConfig.host, {
@@ -24,7 +27,12 @@ const getSSLExpiration = function(connectionConfig,success,fail) {
             }
 
         });
-
+        sd.setTimeout(connectionConfig.timeout);
+        sd.on('timeout', () => {
+          sd.end();
+          sd.destroy();
+          reject(fail(`Error timeout to ${connectionConfig.host}:${connectionConfig.domain}`));
+        });
         sd.on('error', function (err) {
             reject(fail(`Error with connect to ${connectionConfig.host}:${connectionConfig.domain}`));
         });
@@ -68,6 +76,7 @@ async function run() {
                 host: target.host,
                 port: 443,
                 domain: target.domain,
+                timeout: target.timeout?target.timeout:DEFAULT_TIMEOUT,
             }
             promises.push(getSSLExpiration(connectionConfig,
                 (certData)=>{
@@ -173,6 +182,8 @@ async function run() {
     console.log(`Warnings: ${warningErrors.length}`)
     console.log(`Critical: ${criticalErrors.length}`)
     console.log("-----------------------")
+    console.log(`End time:`,Date.now())
+    console.log(`Duration:`,Date.now()-starttime)
 
     let assertMessage=[]
     setAttribute("scriptErrors",scriptErrors.length)
@@ -204,6 +215,7 @@ async function run() {
     }
     
     console.log("---END---")
+
 }
 
 run()
