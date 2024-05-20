@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "uglifyjs --compress --mangle -- ./base_script.js  > synthetic.js && awk 1 ./utils_script.js >> synthetic.js",
+    "build": "cat ./base_script.js  > synthetic.js && awk 1 ./utils_script.js >> synthetic.js",
     "add": "git add ./synthetic.js",
     "echo": "echo Build: synthetic.js created!"
   },

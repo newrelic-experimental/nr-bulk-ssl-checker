@@ -1,11 +1,7 @@
 /*
 * ----------------------------------------------------------------------------------
 */
-
 const tls = require('tls');
-
-// const mytlssocket = tls.TLSSocket
-// mytlssocket.setTimeout(3000)
 
 const getSSLExpiration = function(connectionConfig,success,fail) {
     return new Promise((resolve, reject) => {
@@ -13,12 +9,13 @@ const getSSLExpiration = function(connectionConfig,success,fail) {
             servername: connectionConfig.domain,
         }, () => {
             const certDetails = sd.getPeerCertificate(true);
-            
+
             sd.end();
             if(certDetails && certDetails.valid_to) {
                 let certData={ 
                     valid_to: certDetails.valid_to,
-                    issuer: (certDetails.issuer && certDetails.issuer.O) ? certDetails.issuer.O : "Unkown"
+                    issuer: (certDetails.issuer && certDetails.issuer.O) ? certDetails.issuer.O : "Unkown",
+                    subjectaltname: certDetails.subjectaltname
                 }      
                 console.log(`${connectionConfig.host} ${connectionConfig.domain} data:`,certData)
                 resolve(success(certData))
@@ -27,12 +24,9 @@ const getSSLExpiration = function(connectionConfig,success,fail) {
             }
 
         });
-        sd.setTimeout(DEFAULT_TIMEOUT)
-        sd.on('error', function (err) {
-            err.name = 'CHECK_CERT_EXPIRATION_COMM';
-            console.log(`${connectionConfig.host} ${connectionConfig.domain}`)
-            reject(err);
 
+        sd.on('error', function (err) {
+            reject(fail(`Error with connect to ${connectionConfig.host}:${connectionConfig.domain}`));
         });
     })
 }
