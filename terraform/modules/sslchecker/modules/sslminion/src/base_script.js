@@ -34,7 +34,8 @@ const getSSLExpiration = function(connectionConfig,success,fail) {
           reject(fail(`Error timeout to ${connectionConfig.host}:${connectionConfig.domain}`));
         });
         sd.on('error', function (err) {
-            reject(fail(`Error with connect to ${connectionConfig.host}:${connectionConfig.domain}`));
+
+          reject(fail(`Error with connect to ${connectionConfig.host}:${connectionConfig.domain}`));
         });
     })
 }
