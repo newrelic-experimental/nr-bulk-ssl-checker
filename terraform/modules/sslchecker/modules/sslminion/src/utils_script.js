@@ -1,18 +1,10 @@
 /*
-* Utils and common settings
+* Utils 
 */
 
 const moment = require("moment")
-const assert = require('assert')
+let assert = require('assert')
 
-const DEFAULT_TIMEOUT = 5000  
-const BATCH_SIZE = 50
-const METRIC_API = "https://metric-api.newrelic.com/metric/v1" //US DC accounts
-
-const CRITICAL_THRESHOLD = 14
-const WARNING_THRESHOLD = 28
-
-let RUNNING_LOCALLY = false
 let scriptErrors = []
 let criticalErrors = []
 let warningErrors = []
@@ -23,16 +15,16 @@ let warningErrors = []
 *  mimicking it running in the new relic environment. Much easier to develop!
 */
 
+got = require('got')
 
+RUNNING_LOCALLY=false;
 const IS_LOCAL_ENV = typeof $http === 'undefined';
 if (IS_LOCAL_ENV) {  
   RUNNING_LOCALLY=true
-  var $http = require("request");       //only for local development testing
-  var $secure = {}                      //only for local development testing
-  var $env = {}
-  $env.LOCATION="local"
+  var $http=require('got');
   console.log("Running in local mode")
 } 
+
 // ========== END LOCAL TESTING CONFIGURATION ==========================
 
 
@@ -61,27 +53,31 @@ const setAttribute = function(key,value) {
 * @param {function} success     - Call back function to run on successfule request
 */
 const  genericServiceCall = function(responseCodes,options,success) {
-    !('timeout' in options) && (options.timeout = DEFAULT_TIMEOUT) //add a timeout if not already specified 
-    let possibleResponseCodes=responseCodes
-    if(typeof(responseCodes) == 'number') { //convert to array if not supplied as array
-      possibleResponseCodes=[responseCodes]
-    }
-    return new Promise((resolve, reject) => {
-        $http(options, function callback(error, response, body) {
-        if(error) {
-            reject(`Connection error on url '${options.url}'`)
-        } else {
-            if(!possibleResponseCodes.includes(response.statusCode)) {
-                let errmsg=`Expected [${possibleResponseCodes}] response code but got '${response.statusCode}' from url '${options.url}'`
-                reject(errmsg)
-            } else {
-                resolve(success(body,response,error))
-            }
-          }
-        });
-    })
+  !('timeout' in options) && (options.timeout = DEFAULT_TIMEOUT) //add a timeout if not already specified 
+  let possibleResponseCodes=responseCodes
+  if(typeof(responseCodes) == 'number') { //convert to array if not supplied as array
+    possibleResponseCodes=[responseCodes]
   }
+  return new Promise((resolve, reject) => {
+      $http(options, function callback(error, response, body) {
+      if(error) {
+          console.log("Request error:",error)
+          console.log("Response:",response)
+          console.log("Body:",body)
+          reject(`Connection error on url '${options.url}'`)
+      } else {
+          if(!possibleResponseCodes.includes(response.statusCode)) {
+              let errmsg=`Expected [${possibleResponseCodes}] response code but got '${response.statusCode}' from url '${options.url}'`
+              reject(errmsg)
+          } else {
+              resolve(success(body,response,error))
+          }
+        }
+      });
+  })
+}
 
+  
 
 /*
 * sendDataToNewRelic()
@@ -90,23 +86,22 @@ const  genericServiceCall = function(responseCodes,options,success) {
 * @param {object} data               - the payload to send
 */
 const sendDataToNewRelic = async (data) =>  {
-    let request = {
-        url: METRIC_API,
-        method: 'POST',
-        json: true,
-        headers :{
-            "Api-Key": INSERT_KEY
-        },
-        body: data
-    }
-    return genericServiceCall([200,202],request,(body,response,error)=>{
-        if(error) {
-            console.log(`NR Post failed : ${error} `)
-            return false
-        } else {
-            return true
-        }
-        })
+  let request = {
+      url: METRIC_API,
+      method: 'POST',
+      headers :{
+          "Api-Key": INSERT_KEY
+      },
+      body: JSON.stringify(data)
+  }
+  return genericServiceCall([200,202],request,(body,response,error)=>{
+      if(error) {
+          console.log(`NR Post failed : ${error} `)
+          return false
+      } else {
+          return true
+      }
+})
 }
 
 

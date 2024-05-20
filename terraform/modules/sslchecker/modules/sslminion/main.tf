@@ -6,42 +6,33 @@ variable "insertKeyValue" { description = "Insert key valye"}
 variable "targetDataJS" { description = "JS code to set target data"}
 variable "nameSpace" { description = "Namespace for the app, usually SSLCHKR, provide a different one if deploying this app more than once to an account" }
 
-resource "newrelic_synthetics_monitor" "monitor" {
-  name = "${var.nameSpace}-${var.name}"
-  type = "SCRIPT_API"
-  frequency = var.frequency
-  status = "ENABLED"
-  locations = var.locations
+
+resource "newrelic_synthetics_script_monitor" "monitor" {
+  status               = "ENABLED"
+  name                 = "${var.nameSpace}_${var.name}"
+  type                 = "SCRIPT_API"
+  locations_public     = var.locations
+  period               = var.frequency
+
+  script               = "const MONITOR_NAME=\"${var.nameSpace}-${var.name}\"\nconst NAMESPACE=\"${var.nameSpace}\" \nlet INSERT_KEY=$secure.${newrelic_synthetics_secure_credential.metricsInsertKey.key}\n${var.targetDataJS}\n${data.local_file.synthetic_js.content}"
+
+  script_language      = "JAVASCRIPT"
+  runtime_type         = "NODE_API"
+  runtime_type_version = "16.10"
 }
 
 resource "newrelic_synthetics_secure_credential" "metricsInsertKey" {
-  key = "${var.nameSpace}_MetricInsertKey_${replace(newrelic_synthetics_monitor.monitor.id,"-","_")}"
+  key = "${var.nameSpace}_${random_string.random.result}"
   value = var.insertKeyValue
   description = "API key for inserting metrics data to New Relic"
 }
 
-data "local_file" "base_js" {
-    filename = "${path.module}/src/base_script.js"
+resource "random_string" "random" {
+  length           = 6
+  special          = false
+  override_special = "/@£$_-"
 }
 
-data "local_file" "utils_js" {
-    filename = "${path.module}/src/utils_script.js"
-}
-
-data "template_file" "header_js" {
-    template = templatefile(
-               "${path.module}/src/header_script.js",
-               {
-                monitorName = var.name
-                monitorId = newrelic_synthetics_monitor.monitor.id
-                nameSpace = var.nameSpace
-                insertKeyName = newrelic_synthetics_secure_credential.metricsInsertKey.key
-               }
-        )
-}
-
-resource "newrelic_synthetics_monitor_script" "main" {
-  monitor_id = newrelic_synthetics_monitor.monitor.id
-  text = "${data.template_file.header_js.rendered} ${data.local_file.utils_js.content} ${var.targetDataJS} ${data.local_file.base_js.content}"
-  depends_on = [newrelic_synthetics_secure_credential.metricsInsertKey]
+data "local_file" "synthetic_js" {
+    filename = "${path.module}/src/synthetic.js"
 }

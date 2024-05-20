@@ -1,29 +1,41 @@
 /*
 * ----------------------------------------------------------------------------------
 */
+const tls = require('tls');
 
+const starttime= Date.now()
+console.log(`Start time:`,starttime)
 
-const getSSLExpiration = function(options,success,fail) {
-    !('timeout' in options) && (options.timeout = DEFAULT_TIMEOUT) //add a timeout if not already specified 
-    options.followRedirect = false //only the first request contains ssl data
+const getSSLExpiration = function(connectionConfig,success,fail) {
     return new Promise((resolve, reject) => {
-        $http(options, function callback(error, response, body) {
-        if(error) {
-            reject(fail(`Connection error on url '${options.url}'`))
-        } else {
-            let certDetails = (response.socket.getPeerCertificate());   
+        const sd = tls.connect(connectionConfig.port,connectionConfig.host, {
+            servername: connectionConfig.domain,
+        }, () => {
+            const certDetails = sd.getPeerCertificate(true);
+
+            sd.end();
             if(certDetails && certDetails.valid_to) {
                 let certData={ 
                     valid_to: certDetails.valid_to,
-                    issuer: (certDetails.issuer && certDetails.issuer.O) ? certDetails.issuer.O : "Unkown"
-
+                    issuer: (certDetails.issuer && certDetails.issuer.O) ? certDetails.issuer.O : "Unkown",
+                    subjectaltname: certDetails.subjectaltname
                 }      
-                //console.log(`${options.url} data:`,certData)
+                console.log(`${connectionConfig.host} ${connectionConfig.domain} data:`,certData)
                 resolve(success(certData))
             } else {
                 reject(fail(`Expiration date missing`))
             }
-          }
+
+        });
+        sd.setTimeout(connectionConfig.timeout);
+        sd.on('timeout', () => {
+          sd.end();
+          sd.destroy();
+          reject(fail(`Error timeout to ${connectionConfig.host}:${connectionConfig.domain}`));
+        });
+        sd.on('error', function (err) {
+
+          reject(fail(`Error with connect to ${connectionConfig.host}:${connectionConfig.domain}`));
         });
     })
 }
@@ -35,12 +47,14 @@ async function run() {
     const targets = flat(sourceData.map((x) => {
         const name = x.name || x.domain;
 
+        //if config contains a hosts array then we run a test for each
         if (x.hosts && x.hosts.length) {
             return x.hosts.map((y) => ({
                 name: `${y} | ${name}`,
                 domain: x.domain,
                 host: y,
                 url: `https://${y}`,
+                timeout: x.timeout ? x.timeout : DEFAULT_TIMEOUT,
             }))
         } else {
             return {
@@ -48,6 +62,7 @@ async function run() {
                 domain: x.domain,
                 host: x.domain,
                 url: `https://${x.domain}`,
+                timeout: x.timeout ? x.timeout : DEFAULT_TIMEOUT,
             }
         }
     }));
@@ -61,14 +76,13 @@ async function run() {
         let promises=[]
 
         batch.forEach((target)=>{
-            let options = {
-                url: target.url,
-                method: 'HEAD',
-                headers: {
-                    host: target.domain
-                }
+            let connectionConfig = {
+                host: target.host,
+                port: 443,
+                domain: target.domain,
+                timeout: target.timeout
             }
-            promises.push(getSSLExpiration(options,
+            promises.push(getSSLExpiration(connectionConfig,
                 (certData)=>{
                     let expirationDate = new Date(certData.valid_to)
                     let expirationMoment=moment(expirationDate)
@@ -105,7 +119,6 @@ async function run() {
         //Construct metric payload
         let commonMetricBlock={"attributes": {}}
         commonMetricBlock.attributes[`${NAMESPACE}.monitorName`]=MONITOR_NAME
-        commonMetricBlock.attributes[`${NAMESPACE}.monitorId`]=MONITOR_ID
         commonMetricBlock.attributes[`tool`]=NAMESPACE 
 
         let unixTimeNow=Math.round(Date.now()/1000)
@@ -173,6 +186,8 @@ async function run() {
     console.log(`Warnings: ${warningErrors.length}`)
     console.log(`Critical: ${criticalErrors.length}`)
     console.log("-----------------------")
+    console.log(`End time:`,Date.now())
+    console.log(`Duration:`,Date.now()-starttime)
 
     let assertMessage=[]
     setAttribute("scriptErrors",scriptErrors.length)
@@ -204,6 +219,7 @@ async function run() {
     }
     
     console.log("---END---")
+
 }
 
 run()
