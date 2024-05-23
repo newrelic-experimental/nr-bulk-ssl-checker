@@ -21,7 +21,7 @@ const getSSLExpiration = function(connectionConfig,success,fail) {
                     issuer: (certDetails.issuer && certDetails.issuer.O) ? certDetails.issuer.O : "Unkown",
                     subjectaltname: certDetails.subjectaltname
                 }      
-                console.log(`${connectionConfig.host} ${connectionConfig.domain} data:`,certData)
+               // console.log(`${connectionConfig.host} ${connectionConfig.domain} data:`,certData)
                 resolve(success(certData))
             } else {
                 reject(fail(`Expiration date missing`))
