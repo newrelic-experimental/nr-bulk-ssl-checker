@@ -14,6 +14,7 @@ const getSSLExpiration = function(connectionConfig,success,fail) {
             const certDetails = sd.getPeerCertificate(true);
 
             sd.end();
+            sd.destroy();
             if(certDetails && certDetails.valid_to) {
                 let certData={ 
                     valid_to: certDetails.valid_to,
@@ -34,7 +35,7 @@ const getSSLExpiration = function(connectionConfig,success,fail) {
           reject(fail(`Error timeout to ${connectionConfig.host}:${connectionConfig.domain}`));
         });
         sd.on('error', function (err) {
-
+          console.log("Socket error",err);
           reject(fail(`Error with connect to ${connectionConfig.host}:${connectionConfig.domain}`));
         });
     })
