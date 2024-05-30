@@ -8,9 +8,7 @@ console.log(`Start time:`,starttime)
 
 const getSSLExpiration = function(connectionConfig,success,fail) {
     return new Promise((resolve, reject) => {
-        const sd = tls.connect(connectionConfig.port,connectionConfig.host, {
-            servername: connectionConfig.domain,
-        }, () => {
+        const sd = tls.connect(connectionConfig.port,connectionConfig.host, {servername: connectionConfig.domain, rejectUnauthorized: connectionConfig.rejectUnauthorized,}, () => {
             const certDetails = sd.getPeerCertificate(true);
 
             sd.end();
@@ -81,7 +79,8 @@ async function run() {
                 host: target.host,
                 port: 443,
                 domain: target.domain,
-                timeout: target.timeout
+                timeout: target.timeout,
+                rejectUnauthorized: REJECTUNAUTHORIZED
             }
             promises.push(getSSLExpiration(connectionConfig,
                 (certData)=>{
