@@ -1,4 +1,7 @@
 #!/bin/sh
 npm run --prefix ./terraform/modules/sslchecker/modules/sslminion/src build
+npm run --prefix ./terraform/modules/sslchecker/modules/sslminion/src copy_paste_js
+npm run --prefix ./terraform/modules/sslchecker/modules/sslminion/src copy_paste_example_js
 npm run --prefix ./terraform/modules/sslchecker/modules/sslminion/src add
 npm run --prefix ./terraform/modules/sslchecker/modules/sslminion/src echo
+
