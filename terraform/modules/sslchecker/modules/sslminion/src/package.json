@@ -6,13 +6,9 @@
   "scripts": {
     "build": "cat ./header.js > synthetic.js && uglifyjs --compress --mangle -- ./base_script.js  >> synthetic.js && uglifyjs --compress --mangle -- ./utils_script.js >> synthetic.js && cat ./example_header.js > ../../../../../../copy-paste-example.js && cat ./synthetic.js >> ../../../../../../copy-paste-example.js",
     "add": "git add ./synthetic.js && git add ../../../../../../copy-paste-example.js",
-    "echo": "echo Build: synthetic.js created!"
+    "echo": "echo Build: synthetic.js created!",
+    "prepare": "cd ../../../../../../ && husky terraform/modules/sslchecker/modules/sslminion/src/.husky"
   },
-  "pre-commit": [
-    "build",
-    "add",
-    "echo"
-  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -23,7 +19,7 @@
     "uglifyjs": "^2.4.11"
   },
   "devDependencies": {
-    "pre-commit": "^1.2.2",
+    "husky": "^9.0.11",
     "uglify-js": "^3.17.4"
   }
 }
