@@ -26,17 +26,22 @@ The targets to test are provided by calling the function getTargets(). You can p
             "555.666.777.888",
         ]
     },
+    {
+        "domain":"self-signed-cert.com",
+        "allowUnauthorized": true
+    },
     {...}
 ]
 ```
 
-* `name`: Optional
-* `domain`: Required
-* `hosts`: Optional
-* `timeout`: Optional
+* `name`: Optional - Friendly Name of the site being tested
+* `domain`: Required - The domain name to test
+* `hosts`: Optional - An array of IP addresses to test, skipping DNS
+* `timeout`: Optional - miiliseconds timeout (default 5000)
+* `allowUnauthorized`: Optional - if `true` then cert will not be validated against CA (useful for self-signed)
 
 
-## Getting started (terraform)
+## Getting started (Terraform)
 
 1. Checkout the repo
 2. Copy `runtf.sh.sample` to `runtf.sh` and add your API keys
@@ -49,6 +54,8 @@ The targets to test are provided by calling the function getTargets(). You can p
 * Target Data Sources - `./terraform/main.tf`
 * Thresholds and timeouts - `./terraform/modules/sslchecker/modules/sslminion/src/synthetic.js` (built)
 
+The boilerplate example references [static_small.js](./terraform/targetdata/static_small.js) from `main.tf` which is a small java script funciton that defines the SSL (TLS) domains to test. There are some other exmaples here of how to specify these. You can event query an API to drive the configuration as demonstrated in [api-driven.js](./terraform/targetdata/api-driven.js).
+
 ### Dashboard
 
 The application comes with a built in dashboard. Set up alerts as you require.
@@ -56,4 +63,4 @@ The application comes with a built in dashboard. Set up alerts as you require.
 ![dashboard-example](dashboard.png)
 
 ## Getting started (Copy and Paste)
-Simply copy and paste the [`copy-paste-example.js`](./copy-paste-example.js) into a Scripted API synthetic monitor. You will need to provide an ingest API key (prefereably via a secure credential) and define your getTargets() function.
+Simply copy and paste the [`copy-paste-example.js`](./copy-paste-example.js) into a Scripted API synthetic monitor. You will need to provide an ingest API key (prefereably via a secure credential) and define your getTargets() function. Refer to the [example scripts](./terraform/targetdata/) for configuration ideas.

@@ -4,13 +4,10 @@
 const tls = require('tls');
 
 const starttime= Date.now()
-console.log(`Start time:`,starttime)
-
+let socketErrorTriggered=false;
 const getSSLExpiration = function(connectionConfig,success,fail) {
     return new Promise((resolve, reject) => {
-        const sd = tls.connect(connectionConfig.port,connectionConfig.host, {
-            servername: connectionConfig.domain,
-        }, () => {
+        const sd = tls.connect(connectionConfig.port,connectionConfig.host, {servername: connectionConfig.domain, rejectUnauthorized: connectionConfig.rejectUnauthorized,}, () => {
             const certDetails = sd.getPeerCertificate(true);
 
             sd.end();
@@ -35,8 +32,8 @@ const getSSLExpiration = function(connectionConfig,success,fail) {
           reject(fail(`Error timeout to ${connectionConfig.host}:${connectionConfig.domain}`));
         });
         sd.on('error', function (err) {
-          console.log("Socket error",err);
-          reject(fail(`Error with connect to ${connectionConfig.host}:${connectionConfig.domain}`));
+          socketErrorTriggered=true;
+          reject(fail(`Socket error ${connectionConfig.host}:${connectionConfig.domain} ${err.code? '['+err.code+']' : ''}`));
         });
     })
 }
@@ -56,6 +53,7 @@ async function run() {
                 host: y,
                 url: `https://${y}`,
                 timeout: x.timeout ? x.timeout : DEFAULT_TIMEOUT,
+                allowUnauthorized: x.allowUnauthorized
             }))
         } else {
             return {
@@ -64,6 +62,7 @@ async function run() {
                 host: x.domain,
                 url: `https://${x.domain}`,
                 timeout: x.timeout ? x.timeout : DEFAULT_TIMEOUT,
+                allowUnauthorized: x.allowUnauthorized
             }
         }
     }));
@@ -81,7 +80,8 @@ async function run() {
                 host: target.host,
                 port: 443,
                 domain: target.domain,
-                timeout: target.timeout
+                timeout: target.timeout,
+                rejectUnauthorized: target.allowUnauthorized === undefined ? true : target.allowUnauthorized === true ? false : true // allow domain's to be self cert: the server certificate is verified against the list of supplied CAs. An 'error' event is emitted if verification fails; err.code contains the OpenSSL error code. Default: false, will be checked). https://nodejs.org/docs/latest/api/tls.html#tlssocketrenegotiateoptions-callback 
             }
             promises.push(getSSLExpiration(connectionConfig,
                 (certData)=>{
@@ -110,7 +110,7 @@ async function run() {
                 (error)=>{
                     target.error=error
                     target.state="ERROR"
-                    scriptErrors.push(`Target '${target.name}' (${target.url} failed cert info lookup)`)
+                    scriptErrors.push(`Target '${target.name}' failed cert info lookup: ${target.error}`)
                 }
             ))
         })
@@ -187,7 +187,6 @@ async function run() {
     console.log(`Warnings: ${warningErrors.length}`)
     console.log(`Critical: ${criticalErrors.length}`)
     console.log("-----------------------")
-    console.log(`End time:`,Date.now())
     console.log(`Duration:`,Date.now()-starttime)
 
     let assertMessage=[]
@@ -195,6 +194,9 @@ async function run() {
     if(scriptErrors.length > 0){
         setAttribute("scriptErrorMsg",scriptErrors.join('|'))
         console.log("Script errors:",JSON.stringify(scriptErrors))
+        if(socketErrorTriggered) {
+            console.log("TIP: Some domains caused a socket error. You may need to consider ignoring authorization, e.g. for self signed certs. This can be configured by providing 'allowUnauthorized:true' option for the target.")
+        }
         assertMessage.push("SSL checker script error or some targets are in ERROR state")
     }
     setAttribute("criticalErrors",criticalErrors.length)
