@@ -4,15 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "cat ./header.js > synthetic.js && uglifyjs --compress --mangle -- ./base_script.js  >> synthetic.js && uglifyjs --compress --mangle -- ./utils_script.js >> synthetic.js && cat ./example_header.js > ../../../../../../copy-paste-example.js && cat ./synthetic.js >> ../../../../../../copy-paste-example.js",
-    "add": "git add ./synthetic.js && git add ../../../../../../copy-paste-example.js",
-    "echo": "echo Build: synthetic.js created!"
+    "build": "cat ./header.js > synthetic.js && uglifyjs --compress --mangle -- ./base_script.js  >> synthetic.js && uglifyjs --compress --mangle -- ./utils_script.js >> synthetic.js",
+    "copy_paste_js": "cat ./header.js > copy_paste.js && cat ./utils_script.js >> copy_paste.js && cat ./base_script.js  >> copy_paste.js",
+    "copy_paste_example_js": "cat ./example_header.js > ../../../../../../copy-paste-example.js && cat ./synthetic.js >> ../../../../../../copy-paste-example.js",
+    "echo": "echo Build process complete!"
   },
-  "pre-commit": [
-    "build",
-    "add",
-    "echo"
-  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -23,7 +19,6 @@
     "uglifyjs": "^2.4.11"
   },
   "devDependencies": {
-    "pre-commit": "^1.2.2",
     "uglify-js": "^3.17.4"
   }
 }
