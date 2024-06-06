@@ -1,0 +1,23 @@
+name: pre-commit
+
+on:
+  push:
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.2.0
+    - run: npm install --cache /tmp/empty-cache --prefix ./terraform/modules/sslchecker/modules/sslminion/src && npm run --prefix ./terraform/modules/sslchecker/modules/sslminion/src build && npm run --prefix ./terraform/modules/sslchecker/modules/sslminion/src copy_paste_js && npm run --prefix ./terraform/modules/sslchecker/modules/sslminion/src copy_paste_example_js && npm run --prefix ./terraform/modules/sslchecker/modules/sslminion/src echo 
+    - name: pre-commit push
+      run: |
+        git config --global user.name 'Automation'
+        git config --global user.email 'Automation@users.noreply.github.com'.
+        git add . 
+        git commit -am "pre-commit action"
+        git push
