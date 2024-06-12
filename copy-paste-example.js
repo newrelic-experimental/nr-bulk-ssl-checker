@@ -18,7 +18,7 @@ const getTargets=async ()=>{
     ]
 }
 
-const METRIC_API = "https://metric-api.newrelic.com/metric/v1" //US data center accounts
+const METRIC_API = "https://metric-api.newrelic.com/metric/v1" // US data center accounts
 //const METRIC_API = "metric-api.eu.newrelic.com" // EU data center accounts
 
 const CRITICAL_THRESHOLD = 14 // number of days left to trigger critical state
