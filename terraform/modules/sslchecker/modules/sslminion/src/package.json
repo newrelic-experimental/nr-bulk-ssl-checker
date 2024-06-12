@@ -15,7 +15,6 @@
     "assert": "^2.0.0",
     "got": "^14.2.1",
     "moment": "^2.24.0",
-    "request": "^2.88.0",
     "uglifyjs": "^2.4.11"
   },
   "devDependencies": {
