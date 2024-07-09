@@ -72,8 +72,14 @@ You may wish to be alerted if your certificates are about to expire. The script 
 ## Exploring the data
 If you deployed using terraform you will find a dashbaord that lets you explore the data easily. If not you may explore the data manually using NRQL. The following data is available:
 
-**Synthetic Check Data**
-The summary information about each run of the script is stored as custom attributes against the SyntheticCheck event type. This includes the total number of critical and warning errors amongths other useful meta data. You can query this for example: `SELECT latest(custom.criticalErrors), latest(custom.warningErrors) from SyntheticCheck where monitorName = 'your-monitor-name'
+#### Synthetic Check Data
+The summary information about each run of the script is stored as custom attributes against the SyntheticCheck event type. This includes the total number of critical and warning errors amongths other useful meta data. You can query this for example: 
+```
+SELECT latest(custom.criticalErrors), latest(custom.warningErrors) from SyntheticCheck where monitorName = 'your-monitor-name'
+```
 
-**Target Data**
-Data about each target is recorded as a metric in the Metric event type called  `{NAMESPACE}.days`. The name of the metric varies depending on the value set for `NAMESPACE` for which the default is `SSLCHKR`. The data includes dimensional meta attributes for each target including issuer and expir date. You can query the data as follows: `SELECT getField(SSLCHKR.days, 'latest') as 'Days Left', * from Metric where tool='SSLCHKR'`
+#### Target Data
+Data about each target is recorded as a metric in the Metric event type called  `{NAMESPACE}.days`. The name of the metric varies depending on the value set for `NAMESPACE` for which the default is `SSLCHKR`. The data includes dimensional meta attributes for each target including issuer and expir date. You can query the data as follows: 
+```
+SELECT getField(SSLCHKR.days, 'latest') as 'Days Left', * from Metric where tool='SSLCHKR'
+```
