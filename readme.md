@@ -42,6 +42,7 @@ The targets to test are provided by calling the function getTargets(). You can p
 
 
 ## Getting started (Terraform)
+You can either user the terraform deployment method (detailed here) or the simpler copy and paste method (see below). The teraform deployment sets up the synhtetic monitor, secure credentials and monitoring dashbaord.
 
 1. Checkout the repo
 2. Copy `runtf.sh.sample` to `runtf.sh` and add your API keys
@@ -63,7 +64,9 @@ The application comes with a built in dashboard. Set up alerts as you require.
 ![dashboard-example](dashboard.png)
 
 ## Getting started (Copy and Paste)
-Simply copy and paste the [`copy-paste-example.js`](./copy-paste-example.js) into a Scripted API synthetic monitor. You will need to provide an ingest API key (prefereably via a secure credential) and define your getTargets() function. Refer to the [example scripts](./terraform/targetdata/) for configuration ideas.
+This is the simplest way to get started, you wil need to manualy create you synthetic monitor. 
+
+Copy and paste the [`copy-paste-example.js`](./copy-paste-example.js) into a Scripted API synthetic monitor. You will need to provide an ingest API key (prefereably via a secure credential) and define your getTargets() function. Refer to the [example scripts](./terraform/targetdata/) for configuration ideas.
 
 
 ## Alerting
